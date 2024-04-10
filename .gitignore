@@ -1,0 +1,12 @@
+.vscode
+.idea
+
+lib
+build
+bin
+dataset
+cmake-build-debug
+
+pymetis
+setup.py
+
