@@ -18,7 +18,7 @@ popd
 
 # build ParMETIS
 pushd ${SCRIPT_DIR}/third_party/parmetis/
-make config prefix=${SCRIPT_DIR}/third_party/build
+make config prefix=${SCRIPT_DIR}/third_party/build shared=1
 make -j
 make install
 popd
@@ -39,5 +39,5 @@ cmake --build . -j
 cmake --install .
 popd
 
-rm -rf build
-cmake -B build -GNinja && cmake --build build -j
+# rm -rf build
+# cmake -B build -GNinja && cmake --build build -j

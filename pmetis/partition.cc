@@ -17,11 +17,12 @@ namespace pmetis
         VertexPIDType nparts = num_partitions;
         VertexPIDType nvtxs = indptr.size() - 1;
         IndptrType num_edge = indices.size();
-        VertexIDType ncon = 1;
+        VertexIDType ncon = 1; // number of constraint
         if (node_weight.size())
         {
             VertexIDType nvwgt = node_weight.size();
             ncon = nvwgt / nvtxs;
+            std::cout << "nvwgt: " << nvwgt << " nvtxs: " << nvtxs << std::endl;
             assert(nvwgt % nvtxs == 0);
         };
 
@@ -55,7 +56,7 @@ namespace pmetis
             ewgt = edge_weight.data();
 
         WeightType objval = 0;
-        idx_t *options = nullptr;
+        idx_t options[METIS_NOPTIONS];
         METIS_SetDefaultOptions(options);
         options[METIS_OPTION_NITER] = 3;
         options[METIS_OPTION_OBJTYPE] = obj_cut ? METIS_OBJTYPE_CUT : METIS_OBJTYPE_VOL;

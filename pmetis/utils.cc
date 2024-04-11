@@ -153,9 +153,9 @@ namespace pmetis
             edge_vec.shrink_to_fit();
             int64_t cur_e_num = edge_vec.size();
 
-            std::vector<IndptrType> indptr(v_num);
-            std::vector<VertexIDType> indices(cur_e_num);
+            std::vector<IndptrType> indptr(v_num + 1);
             std::vector<std::atomic<IndptrType>> degree(v_num + 1);
+            std::vector<VertexIDType> indices(cur_e_num);
             auto indices_ptr = indices.data();
             std::cout << "MakeSym compute degree" << std::endl;
 
@@ -211,11 +211,11 @@ namespace pmetis
             edge_vec.erase(std::unique(edge_vec.begin(), edge_vec.end()), edge_vec.end());
             edge_vec.shrink_to_fit();
             int64_t cur_e_num = edge_vec.size();
-            std::vector<IndptrType> indptr(v_num);
+            std::vector<IndptrType> indptr(v_num + 1);
+            std::vector<std::atomic<IndptrType>> degree(v_num + 1);
             std::vector<VertexIDType> indices(cur_e_num);
             std::vector<WeightType> retdata(cur_e_num);
 
-            std::vector<std::atomic<IndptrType>> degree(v_num + 1);
             auto indices_ptr = indices.data();
             auto retdata_ptr = retdata.data();
             std::cout << "MakeSym compute degree" << std::endl;
