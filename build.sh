@@ -1,24 +1,32 @@
 #!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-# build GKlib
 rm -rf ${SCRIPT_DIR}/third_party/build
+
+# build GKlib
 pushd ${SCRIPT_DIR}/third_party/parmetis/metis/GKlib
-make config prefix=${SCRIPT_DIR}/third_party/build gdb=on debug=on
+make config prefix=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
 make -j 
 make install 
 popd
 
 # build METIS
 pushd ${SCRIPT_DIR}/third_party/parmetis/metis
-make config prefix=${SCRIPT_DIR}/third_party/build gdb=on debug=on
+make config prefix=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
 make -j
 make install
 popd
 
 # build ParMETIS
 pushd ${SCRIPT_DIR}/third_party/parmetis/
-make config prefix=${SCRIPT_DIR}/third_party/build shared=on gdb=on debug=on
+make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
+make -j
+make install
+popd
+
+# build MT-METIS
+pushd ${SCRIPT_DIR}/third_party/mt-metis
+./configure --prefix=${SCRIPT_DIR}/third_party/build --edges64bit --vertices64bit --weights64bit --partitions64bit #--debug
 make -j
 make install
 popd
@@ -39,5 +47,5 @@ cmake --build . -j
 cmake --install .
 popd
 
-# rm -rf build
-# cmake -B build -GNinja && cmake --build build -j
+rm -rf build
+cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j

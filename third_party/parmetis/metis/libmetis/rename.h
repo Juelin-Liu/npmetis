@@ -203,7 +203,7 @@
 #define FM_2WayNodeRefine1SidedP        libmetis__FM_2WayNodeRefine1SidedP
 #define FM_2WayNodeRefine2SidedP        libmetis__FM_2WayNodeRefine2SidedP
 
-/* pmetis.c */
+/* cppmetis.c */
 #define MlevelRecursiveBisection	libmetis__MlevelRecursiveBisection
 #define MultilevelBisect		libmetis__MultilevelBisect
 #define SplitGraphPart			libmetis__SplitGraphPart

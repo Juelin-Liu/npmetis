@@ -13,6 +13,7 @@
  */
 
 #include <parmetislib.h>
+#define DEBUG_CONTRACT
 
 #define LHTSIZE 8192 /* This should be a power of two */
 #define MASK    8191 /* This should be equal to LHTSIZE-1 */
@@ -507,7 +508,7 @@ void CreateCoarseGraph_Global(ctrl_t *ctrl, graph_t *graph, idx_t cnvtxs)
   lastvtx  = vtxdist[mype+1];
 
   cmap = graph->cmap = ismalloc(nvtxs+graph->nrecv, -1, "Global_CreateCoarseGraph: cmap");
-
+  printf("nvtxs: %ld nrecv: %ld cmap size: %ld\n", nvtxs, graph->nrecv, nvtxs + graph->nrecv);
   nnbrs   = graph->nnbrs;
   peind   = graph->peind;
   recvind = graph->recvind;
@@ -556,7 +557,7 @@ void CreateCoarseGraph_Global(ctrl_t *ctrl, graph_t *graph, idx_t cnvtxs)
       cmap[i] = cfirstvtx + cnvtxs++;
       if (k != firstvtx+i && (k>=firstvtx && k<lastvtx)) { /* I'm matched locally */
         cmap[k-firstvtx] = cmap[i];
-        match[k-firstvtx] += KEEP_BIT;  /* Add the KEEP_BIT to simplify coding */
+        if (match[k-firstvtx] < KEEP_BIT) match[k-firstvtx]+= KEEP_BIT;  /* Add the KEEP_BIT to simplify coding */
       }
     }
   }
@@ -568,7 +569,8 @@ void CreateCoarseGraph_Global(ctrl_t *ctrl, graph_t *graph, idx_t cnvtxs)
    * The remote processor assigned cmap for them */
   for (i=0; i<nvtxs; i++) {
     if (match[i] < KEEP_BIT) { /* Only vertices that go away satisfy this*/
-      cmap[i] = cmap[nvtxs+BSearch(graph->nrecv, recvind, match[i])];
+      idx_t advance = BSearch(graph->nrecv, recvind, match[i]);
+      cmap[i] = cmap[nvtxs + advance];
     }
   }
 

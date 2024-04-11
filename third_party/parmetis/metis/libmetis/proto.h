@@ -277,7 +277,7 @@ void FM_2WayNodeRefine2SidedP(ctrl_t *ctrl, graph_t *graph, idx_t *hmarker,
          real_t ubfactor, idx_t npasses);
 
 
-/* pmetis.c */
+/* cppmetis.c */
 idx_t MlevelRecursiveBisection(ctrl_t *ctrl, graph_t *graph, idx_t nparts, 
           idx_t *part, real_t *tpwgts, idx_t fpart);
 idx_t MultilevelBisect(ctrl_t *ctrl, graph_t *graph, real_t *tpwgts);

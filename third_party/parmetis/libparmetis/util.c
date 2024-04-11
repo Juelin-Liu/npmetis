@@ -66,15 +66,22 @@ idx_t BSearch(idx_t n, idx_t *array, idx_t key)
     c = (a+b)>>1;
     if (array[c] > key)
       b = c;
-    else
+    else if (array[c] < key)
       a = c;
+    else return c;
   }
 
   for (c=a; c<b; c++) {
     if (array[c] == key)
       return c;
   }
-
+  
+  // printf("array: ");
+  // for (idx_t i = 0; i < n; i++) {
+  //   printf("%ld ", array[i]);
+  // }
+  // printf("key %ld not found!\n", key);
+  // exit(-2);
   errexit("Key %"PRIDX" not found!\n", key);
 
   return 0;

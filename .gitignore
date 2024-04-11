@@ -10,3 +10,4 @@ cmake-build-debug
 pymetis
 setup.py
 
+run.sh
