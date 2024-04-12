@@ -20,7 +20,7 @@ You want to use Metis to conduct kWay partitioning but found it difficult to use
 ## Single Threaded: 
 C++ compiler supoorting C++ standard 20. Ninja, CMake.
 
-## Multi Threaded:
+## Multi-Threaded:
 OpenMP
 
 ## Distributed:
@@ -58,9 +58,9 @@ The output binary files will be in the `./bin` directory.
 --edge_weight="[path to edge_weight file (Optional)]" \
 ```
 
-To use the multi-threaded version, simply change `./bin/main` with `./bin/mt_main`.
+To use the multi-threaded version, change `./bin/main` with `./bin/mt_main`.
 
-To use the distributed version, simply change `./bin/main` with `mpirun -np [number of process] ./bin/mpi_main`. Note, `./bin/mpi_main` is buggy and any contribution is welcome! :smile:
+To use the distributed version, change `./bin/main` with `mpirun -np [number of process] ./bin/mpi_main`. Note, `./bin/mpi_main` is buggy and any contribution is welcome! :smile:
 
 All the input files must end with .npy and are NumPy arrays stored in int64_t format.
 
@@ -71,13 +71,13 @@ The `indptr` file must be ended with either `indptr_sym.npy` or `indptr_xsym.npy
 If the `indptr` file ends with `indptr_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
 If the `indptr` file ends with `indptr_sym.npy`, it will be provided to Metis directly.
 
-Similarly, the `indices` file must be ended with either `indices_sym.npy` or `indices_xsym.npy`. 
+Similarly, the `indices` file must end with either `indices_sym.npy` or `indices_xsym.npy`. 
 
-If the `indices` file ends with `indices_xsym.npy, additional steps will be taken to convert it into symmetrical graphs.
+If the `indices` file ends with `indices_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
 If the `indices` file ends with `indices_sym.npy`, it will be provided to Metis directly.
 
 The `node_weight`, if provided, must have a length equal to the number of nodes in the graph.
 
 The `edge_weight`, if provided, must have a length equal to the number of edges in the graph.
 
-The output files must be ended with `.npy` and the output will be a int64_t NumPy array.
+The output files must end with `.npy` and the output will be an int64_t NumPy array.
