@@ -24,12 +24,26 @@ C++ compiler supoorting C++ standard 20. Ninja, CMake.
 OpenMP
 
 ## Distributed:
-MPI
+MPI, possible solution:
+```bash
+sudo apt install mpich -y
+```
 
 # How to compile:
+
+For single-threaded and multiple-threaded binaries:
 ```bash
 ./build.sh
 ```
+
+To use ParMetis (distributed), you must agree to its [Licence](https://github.com/KarypisLab/ParMETIS/blob/main/LICENSE).
+First download its source code from Github:
+```bash
+wget https://github.com/KarypisLab/ParMETIS/archive/refs/heads/main.zip -O third_party/parmetis.zip
+pushd third_party && unzip parmetis.zip && mv ParMETIS-main parmetis && rm parmetis.zip && popd
+```
+Then, uncomment the code blocks in `build.sh` after `build ParMETIS`, also uncomment the part in `cppmetis/CMakeLists.txt` after `Build mpi_main start`
+`.
 
 The output binary files will be in the `./bin` directory.
 

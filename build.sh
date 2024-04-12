@@ -4,25 +4,25 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 rm -rf ${SCRIPT_DIR}/third_party/build
 
 # build GKlib
-pushd ${SCRIPT_DIR}/third_party/parmetis/metis/GKlib
+pushd ${SCRIPT_DIR}/third_party/GKlib
 make config prefix=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
 make -j 
 make install 
 popd
 
 # build METIS
-pushd ${SCRIPT_DIR}/third_party/parmetis/metis
-make config prefix=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
+pushd ${SCRIPT_DIR}/third_party/metis
+make config prefix=${SCRIPT_DIR}/third_party/build i64=1 gklib_path=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
 make -j
 make install
 popd
 
 # build ParMETIS
-pushd ${SCRIPT_DIR}/third_party/parmetis/
-make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
-make -j
-make install
-popd
+# pushd ${SCRIPT_DIR}/third_party/parmetis/
+# make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
+# make -j
+# make install
+# popd
 
 # build MT-METIS
 pushd ${SCRIPT_DIR}/third_party/mt-metis
