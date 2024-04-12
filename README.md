@@ -1,7 +1,7 @@
-# Project: C++ Metis K-Way Partitioning Wrapper with NumPy Integration
+# Project: NumPy and Metis K-Way Partitioning 
 
 # Overview:
-This project provides a user-friendly C++ wrapper library around the robust Metis K-Way graph partitioning algorithm, enabling seamless usage with versatile NumPy arrays for input and output data representation.
+This project provides a user-friendly C++ wrapper around the robust Metis K-Way graph partitioning algorithm, enabling seamless usage with versatile NumPy arrays for input and output data representation.
 
 # Objectives:
 Metis Integration: Core functionality focuses on encapsulating the Metis K-Way partitioning API within a well-designed C++ interface and provides easy-to-use binary.
@@ -18,7 +18,7 @@ You want to use Metis to conduct kWay partitioning but found it difficult to use
 
 # Prerequisites:
 ## Single Threaded: 
-C++ compiler supoorting C++ standard 20. Ninja, CMake.
+C++ compiler supporting <span> library (GCC >= 10), Ninja, CMake.
 
 ## Multi-Threaded:
 OpenMP
