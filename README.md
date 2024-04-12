@@ -1,4 +1,4 @@
-# Project: NumPy and Metis K-Way Partitioning 
+# Project: Metis with NumPy
 
 # Overview:
 This project provides a user-friendly C++ wrapper around the robust Metis K-Way graph partitioning algorithm, enabling seamless usage with versatile NumPy arrays for input and output data representation.
