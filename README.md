@@ -66,18 +66,16 @@ All the input files must end with .npy and are NumPy arrays stored in int64_t fo
 
 Metis assumes the graph is symmetrical, meaning that if `(u -> v)` then `(v -> u)` and the graph must be undirected.
 
-The `indptr` file must be ended with either `indptr_sym.npy` or `indptr_xsym.npy`. 
+`indptr` file must be ended with either `indptr_sym.npy` or `indptr_xsym.npy`. 
+1. If the `indptr` file ends with `indptr_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
+2. If the `indptr` file ends with `indptr_sym.npy`, it will be provided to Metis directly.
 
-If the `indptr` file ends with `indptr_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
-If the `indptr` file ends with `indptr_sym.npy`, it will be provided to Metis directly.
+`indices` file must end with either `indices_sym.npy` or `indices_xsym.npy`. 
+1. If the `indices` file ends with `indices_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
+2. If the `indices` file ends with `indices_sym.npy`, it will be provided to Metis directly.
 
-Similarly, the `indices` file must end with either `indices_sym.npy` or `indices_xsym.npy`. 
+`node_weight`, if provided, must have a length equal to the number of nodes in the graph.
 
-If the `indices` file ends with `indices_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
-If the `indices` file ends with `indices_sym.npy`, it will be provided to Metis directly.
+`edge_weight`, if provided, must have a length equal to the number of edges in the graph.
 
-The `node_weight`, if provided, must have a length equal to the number of nodes in the graph.
-
-The `edge_weight`, if provided, must have a length equal to the number of edges in the graph.
-
-The output files must end with `.npy` and the output will be an int64_t NumPy array.
+`output` path must end with `.npy` and the result will be an int64_t NumPy array.
