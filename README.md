@@ -1,4 +1,4 @@
-# Project: Metis with NumPy
+# Project: Metis Wrapper
 
 # Overview:
 This project provides a user-friendly C++ wrapper around the robust Metis K-Way graph partitioning algorithm, enabling seamless usage with versatile NumPy arrays for input and output data representation.
