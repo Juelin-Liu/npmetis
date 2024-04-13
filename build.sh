@@ -40,12 +40,12 @@ cmake --install .
 popd
 
 # build cnpy
-mkdir -p ${SCRIPT_DIR}/third_party/cnpy/build
-pushd ${SCRIPT_DIR}/third_party/cnpy/build 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${SCRIPT_DIR}/third_party/build .. 
-cmake --build . -j
-cmake --install .
-popd
+#mkdir -p ${SCRIPT_DIR}/third_party/cnpy/build
+#pushd ${SCRIPT_DIR}/third_party/cnpy/build
+#cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=${SCRIPT_DIR}/third_party/build ..
+#cmake --build . -j
+#cmake --install .
+#popd
 
 rm -rf build
 cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j

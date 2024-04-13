@@ -6,7 +6,7 @@
 using namespace pmetis;
 
 int main(int argc, const char** argv) {
-    int64_t num_partitions = 0;
+    int64_t num_partitions = -1;
     std::string output_path;
 
     auto cmd = CommandLine(argc, argv);
