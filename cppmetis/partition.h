@@ -1,7 +1,6 @@
 #pragma once
 #include "types.h"
 #include <vector>
-#include <span>
 
 namespace pmetis
 {

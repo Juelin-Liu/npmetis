@@ -1,6 +1,5 @@
 #pragma once
 #include "types.h"
-#include <span>
 #include <vector>
 #include <mpi.h>
 

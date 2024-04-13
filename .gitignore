@@ -3,6 +3,7 @@
 
 lib
 build
+**/build
 bin
 cmake-build-debug
 

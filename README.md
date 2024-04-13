@@ -18,7 +18,7 @@ You want to use Metis to conduct kWay partitioning but found it difficult to use
 
 # Prerequisites:
 ## Single Threaded: 
-C++ compiler supporting <span> library (GCC >= 10), Ninja, CMake.
+C++ compiler (GCC >=9 ), Ninja, CMake.
 
 ## Multi-Threaded:
 OpenMP

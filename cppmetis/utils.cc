@@ -62,6 +62,11 @@ namespace pmetis
         }
     };
 
+    bool ends_with(const std::string& str, const std::string& suffix) {
+        size_t index = str.rfind(suffix);
+        return (index != std::string::npos) && (index == str.size() - suffix.size());
+    }
+
     std::unique_ptr<dataset> load_dataset(int argc, const char **argv)
     {
         auto cmd = CommandLine(argc, argv);
@@ -105,9 +110,9 @@ namespace pmetis
         }
 
         std::vector<VertexPIDType> assignment;
-        if (indptr_path.ends_with("indptr_xsym.npy"))
+        if (ends_with(indptr_path, "indptr_xsym.npy"))
         {
-            assert(indices_path.ends_with("indices_xsym.npy"));
+            assert(ends_with(indices_path, "indices_xsym.npy"));
             auto ret = std::make_unique<dataset>();
             std::span<WeightType> edge_weight_span;
             if (edge_weight.num_vals > 0)
@@ -125,7 +130,7 @@ namespace pmetis
         }
         else
         {
-            assert(indices_path.ends_with("indices_sym.npy"));
+            assert(ends_with(indices_path, "indices_sym.npy"));
             auto ret = std::make_unique<dataset>();
             ret->indptr = indptr.as_vec<IndptrType>();
             ret->indices = indices.as_vec<VertexIDType>();

@@ -1,4 +1,4 @@
-#include <cnpy.h>
+#include "cnpy.h"
 #include "utils.h"
 #include "partition.h"
 #include "command_line.h"
