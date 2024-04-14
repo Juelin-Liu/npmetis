@@ -5,7 +5,6 @@
 
 #include <tuple>
 #include <vector>
-#include <span>
 #include <memory>
 
 namespace pmetis
