@@ -19,7 +19,7 @@ enum tag
     partition_map = 4
 };
 
-std::vector<idx_t> get_vtxdist(std::unique_ptr<dataset> &data, int world_size, bool balance_edge = false)
+std::vector<idx_t> get_vtxdist(std::unique_ptr<Dataset> &data, int world_size, bool balance_edge = false)
 {
     std::vector<idx_t> vtxdist(1, 0);
     idx_t num_edges = data->indices.size();
@@ -46,7 +46,7 @@ std::vector<idx_t> get_vtxdist(std::unique_ptr<dataset> &data, int world_size, b
     return vtxdist;
 }
 
-std::vector<idx_t> get_edgedist(std::unique_ptr<dataset> &data, int world_size)
+std::vector<idx_t> get_edgedist(std::unique_ptr<Dataset> &data, int world_size)
 {
     assert(data->vtxdist.size() == world_size + 1);
     std::vector<idx_t> edgedist;
@@ -74,7 +74,7 @@ std::vector<idx_t> get_edgedist(std::unique_ptr<dataset> &data, int world_size)
  * @param world_size
  * @return std::vector<MPI_Request* >
  */
-std::shared_ptr<std::vector<MPI_Request>> send_data(int send_rank, int world_size, const std::unique_ptr<dataset> &data)
+std::shared_ptr<std::vector<MPI_Request>> send_data(int send_rank, int world_size, const std::unique_ptr<Dataset> &data)
 {
     assert(data->vtxdist.size() == world_size + 1);
     assert(send_rank == 0);
@@ -120,7 +120,7 @@ std::shared_ptr<std::vector<MPI_Request>> send_data(int send_rank, int world_siz
 
 std::shared_ptr<std::vector<MPI_Request>> recv_data(int send_rank, int recv_rank, bool use_edge_weight, bool use_node_weight,
                                                     const std::vector<idx_t> vtxdist, const std::vector<idx_t> &edgedist,
-                                                    std::unique_ptr<dataset> &data)
+                                                    std::unique_ptr<Dataset> &data)
 {
     // std::cout << "rank " << recv_rank << " recv data from " << send_rank << std::endl;
     auto requests = std::make_shared<std::vector<MPI_Request>>(2);
@@ -177,15 +177,16 @@ int main(int argc, char **argv)
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    std::unique_ptr<dataset> alldata = std::make_unique<dataset>();
-    std::unique_ptr<dataset> locdata = std::make_unique<dataset>();
+    std::unique_ptr<Dataset> alldata = std::make_unique<Dataset>();
+    std::unique_ptr<Dataset> locdata = std::make_unique<Dataset>();
     std::vector<idx_t> vtxdist(world_size + 1, 0);
     std::vector<idx_t> edgedist(world_size + 1, 0);
     bool use_node_weight, use_edge_weight;
+    Args args = parse_args(argc, const_cast<const char **>(argv));
 
     if (rank == 0)
     {
-        alldata = load_dataset(argc, const_cast<const char **>(argv));
+        alldata = load_dataset(args);
         vtxdist = get_vtxdist(alldata, world_size);
         edgedist = get_edgedist(alldata, world_size);
         use_edge_weight = alldata->edge_weight.size() > 0;
@@ -229,15 +230,15 @@ int main(int argc, char **argv)
     // start metis partitioning
     auto cmd = CommandLine(argc, const_cast<const char **>(argv));
     MPI_Comm comm = MPI_COMM_WORLD;
-    int64_t num_partitions = 0;
+    int64_t num_partition = 0;
     std::string output_path;
 
     cmd.get_cmd_line_argument("output", output_path, output_dir + "products_w4_ndst_efreq_xcut_xbal.npy");
     bool use_cut = cmd.check_cmd_line_flag("use_cut");
-    cmd.get_cmd_line_argument<int64_t>("num_partition", num_partitions, 4);
+    cmd.get_cmd_line_argument<int64_t>("num_partition", num_partition, 4);
 
     // TODO: fix the bug in this function call
-    auto part = mpi_metis_assignment(num_partitions, use_cut, locdata->vtxdist, locdata->indptr, locdata->indices, locdata->node_weight, locdata->edge_weight);
+    auto part = mpi_metis_assignment(args.num_partition, args.num_iteration, args.num_init_part, args.use_cut, locdata->vtxdist, locdata->indptr, locdata->indices, locdata->node_weight, locdata->edge_weight);
 
     MPI_Barrier(MPI_COMM_WORLD);
 

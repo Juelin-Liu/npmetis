@@ -5,8 +5,9 @@
 
 namespace pmetis
 {
-    std::vector<VertexPIDType> mpi_metis_assignment(
-                                                    int64_t num_partitions,
+    std::vector<VertexPIDType> mpi_metis_assignment(int64_t num_partition,
+                                                    int64_t num_iteration,
+                                                    int64_t num_initpart,
                                                     bool obj_cut,
                                                     std::span<IndptrType> vtxdist,
                                                     std::span<IndptrType> indptr,
@@ -14,7 +15,7 @@ namespace pmetis
                                                     std::span<WeightType> node_weight,
                                                     std::span<WeightType> edge_weight)
     {
-        VertexPIDType nparts = num_partitions;
+        VertexPIDType nparts = num_partition;
         VertexPIDType nvtxs = indptr.size() - 1;
         IndptrType num_edge = indices.size();
         // ncon is used to specify the number of weights that each vertex has. It is also the number of balance
@@ -34,7 +35,7 @@ namespace pmetis
             assert(edge_weight.size() == num_edge);
         }
 
-        // std::cout << "metis_assignment num_part: " << num_partitions << std::endl;
+        // std::cout << "metis_assignment num_part: " << num_partition << std::endl;
         // std::cout << "indptr: " << indptr << std::endl;
         // std::cout << "indices: " << indices << std::endl;
         // std::cout << "node_weight: " << node_weight << std::endl;
@@ -98,7 +99,7 @@ namespace pmetis
         // a value of 1 / nparts. If ncon is greater than 1, the target sub-domain weights for each sub-domain
         // are stored contiguously (similar to the vwgt array). Note that the sum of all of the tpwgts for a
         // give vertex weight should be one.
-        std::vector<real_t> tpwgts(ncon * num_partitions, 1.0 / nparts);
+        std::vector<real_t> tpwgts(ncon * num_partition, 1.0 / nparts);
 
         // ubvec: An array of size ncon that is used to specify the imbalance tolerance for each vertex weight, with 1
         // being perfect balance and nparts being perfect imbalance. A value of 1.05 for each of the ncon
@@ -124,13 +125,13 @@ namespace pmetis
         if (obj_cut)
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
-                      << num_edge << " edges into " << num_partitions << " parts and "
+                      << num_edge << " edges into " << num_partition << " parts and "
                       << "get " << objval << " edge cuts" << std::endl;
         }
         else
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
-                      << num_edge << " edges into " << num_partitions << " parts and "
+                      << num_edge << " edges into " << num_partition << " parts and "
                       << "the communication volume is " << objval << std::endl;
         }
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <numeric>
 #include <oneapi/tbb/parallel_sort.h>
+#include <filesystem>
 
 namespace pmetis
 {
@@ -67,53 +68,63 @@ namespace pmetis
         return (index != std::string::npos) && (index == str.size() - suffix.size());
     }
 
-    std::unique_ptr<dataset> load_dataset(int argc, const char **argv)
-    {
+    Args parse_args(int argc, const char **argv){
         auto cmd = CommandLine(argc, argv);
-        int64_t num_partitions{-1};
-        cmd.get_cmd_line_argument<int64_t>("num_partition", num_partitions);
-        bool obj_cut = cmd.check_cmd_line_flag("use_cut");
+        Args args;
 
-        std::string indptr_path, indices_path, output_path, node_weight_path, edge_weight_path;
-        cmd.get_cmd_line_argument<std::string>("indptr", indptr_path);
-        cmd.get_cmd_line_argument<std::string>("indices", indices_path);
-        cmd.get_cmd_line_argument<std::string>("output", output_path);
-        cmd.get_cmd_line_argument<std::string>("node_weight", node_weight_path);
-        cmd.get_cmd_line_argument<std::string>("edge_weight", edge_weight_path);
+        cmd.get_cmd_line_argument<int64_t>("num_partition", args.num_partition, 4);
+        cmd.get_cmd_line_argument<int64_t>("num_init_part", args.num_init_part, 4);
+        cmd.get_cmd_line_argument<int64_t>("num_iteration", args.num_iteration, 10);
+        cmd.get_cmd_line_argument<float>("unbalance_val", args.unbalance_val, 1.05);
+        args.use_cut = cmd.check_cmd_line_flag("use_cut");
+        cmd.get_cmd_line_argument<std::string>("indptr", args.indptr_path);
+        cmd.get_cmd_line_argument<std::string>("indices", args.indices_path);
+        cmd.get_cmd_line_argument<std::string>("output", args.output_path);
+        cmd.get_cmd_line_argument<std::string>("node_weight", args.node_weight_path);
+        cmd.get_cmd_line_argument<std::string>("edge_weight", args.edge_weight_path);
 
-        assert(indptr_path.size() > 0);
-        assert(indices_path.size() > 0);
-        assert(output_path.size() > 0);
-        assert(num_partitions > 0);
-
+        assert(!args.indptr_path.empty());
+        assert(!args.indices_path.empty());
+        assert(!args.output_path.empty());
+        assert(args.num_partition > 0);
+        assert(args.unbalance_val <= args.num_partition);
+        assert(args.unbalance_val >= 1);
         std::cout << "Cmd options:\n";
-        std::cout << "use_cut: " << obj_cut << std::endl;
-        std::cout << "num_partition: " << num_partitions << std::endl;
-        std::cout << "indptr: " << indptr_path << std::endl;
-        std::cout << "indices: " << indices_path << std::endl;
+        std::cout << "num_partition: " << args.num_partition << std::endl;
+        std::cout << "num_init_part: " << args.num_init_part << std::endl;
+        std::cout << "num_iteration: " << args.num_iteration << std::endl;
+        std::cout << "unbalance_val: " << args.unbalance_val << std::endl;
+        std::cout << "use_cut: " << args.use_cut << std::endl;
+        std::cout << "indptr: " << args.indptr_path << std::endl;
+        std::cout << "indices: " << args.indices_path << std::endl;
+        std::cout << "node weight: " << args.node_weight_path << std::endl;
+        std::cout << "edge weight: " << args.edge_weight_path << std::endl;
+        return args;
+    };
 
-        cnpy::NpyArray indptr = cnpy::npy_load(indptr_path);
-        cnpy::NpyArray indices = cnpy::npy_load(indices_path);
+    std::unique_ptr<Dataset> load_dataset(const Args& args)
+    {
+        cnpy::NpyArray indptr = cnpy::npy_load(args.indptr_path);
+        cnpy::NpyArray indices = cnpy::npy_load(args.indices_path);
         cnpy::NpyArray train_node, test_node, valid_node;
         cnpy::NpyArray node_weight, edge_weight;
 
-        if (node_weight_path.size())
+        if (!args.node_weight_path.empty())
         {
-            std::cout << "Use node weight: " << node_weight_path << std::endl;
-            node_weight = cnpy::npy_load(node_weight_path);
+            node_weight = cnpy::npy_load(args.node_weight_path);
         }
 
-        if (edge_weight_path.size())
+        if (!args.edge_weight_path.empty())
         {
-            std::cout << "Use edge weight: " << edge_weight_path << std::endl;
-            edge_weight = cnpy::npy_load(edge_weight_path);
+            std::cout << "Use edge weight: " << args.edge_weight_path << std::endl;
+            edge_weight = cnpy::npy_load(args.edge_weight_path);
         }
 
         std::vector<VertexPIDType> assignment;
-        if (ends_with(indptr_path, "indptr_xsym.npy"))
+        if (ends_with(args.indptr_path, "indptr_xsym.npy"))
         {
-            assert(ends_with(indices_path, "indices_xsym.npy"));
-            auto ret = std::make_unique<dataset>();
+            assert(ends_with(args.indices_path, "indices_xsym.npy"));
+            auto ret = std::make_unique<Dataset>();
             std::span<WeightType> edge_weight_span;
             if (edge_weight.num_vals > 0)
                 edge_weight_span = {edge_weight.data<WeightType>(), edge_weight.num_vals};
@@ -130,8 +141,8 @@ namespace pmetis
         }
         else
         {
-            assert(ends_with(indices_path, "indices_sym.npy"));
-            auto ret = std::make_unique<dataset>();
+            assert(ends_with(args.indices_path, "indices_sym.npy"));
+            auto ret = std::make_unique<Dataset>();
             ret->indptr = indptr.as_vec<IndptrType>();
             ret->indices = indices.as_vec<VertexIDType>();
             if (edge_weight.num_vals)
@@ -336,5 +347,4 @@ namespace pmetis
             return {indptr, indices, retdata};
         }
     }
-
 }

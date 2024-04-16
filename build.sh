@@ -18,11 +18,11 @@ make install
 popd
 
 # build ParMETIS
-# pushd ${SCRIPT_DIR}/third_party/parmetis/
-# make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
-# make -j
-# make install
-# popd
+ pushd ${SCRIPT_DIR}/third_party/parmetis/
+ make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
+ make -j
+ make install
+ popd
 
 # build MT-METIS
 pushd ${SCRIPT_DIR}/third_party/mt-metis

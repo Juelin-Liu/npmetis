@@ -50,7 +50,10 @@ The output binary files will be in the `./bin` directory.
 # How to use:
 ```shell
 ./bin/main \
---num_partition="[number of partitions (Required)]" \
+--num_partition="[number of partitions (default 4)]" \
+--num_init_part="[number of initial partitions (default 4)]" \
+--num_iteration="[number of iterations (default 10)]" \
+--unbalance_val="[unbalance tolerance of each partition (default 1.05)]" \
 --indptr="[path to indptr file (Required)]" \
 --indices="[path to indices file (Required)]" \
 --output="[path to output file (Required)]" \

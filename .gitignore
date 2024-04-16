@@ -7,4 +7,6 @@ build
 bin
 cmake-build-debug
 
-dataset
+third_party/*
+
+Dataset
