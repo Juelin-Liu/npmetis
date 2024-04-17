@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "mt_partition.h"
 
-using namespace pmetis;
+using namespace cppmetis;
 
 int main(int argc, const char** argv) {
     Args args = parse_args(argc, argv);

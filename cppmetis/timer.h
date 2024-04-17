@@ -1,7 +1,7 @@
 #pragma once
 #include <chrono>
 
-namespace pmetis {
+namespace cppmetis {
 
 class Timer {
 public:

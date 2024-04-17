@@ -4,7 +4,7 @@
 #include <cassert>
 #include <numeric>
 
-namespace pmetis
+namespace cppmetis
 {
 
     /**
@@ -19,26 +19,26 @@ namespace pmetis
      * @param indices: local indices for this rank
      * @param node_weight: local node weight for this rank
      * @param edge_weight: local edge weights for this rank
-     * @return std::vector<VertexPIDType> local partition map
+     * @return std::vector<idx_t> local partition map
      */
-    std::vector<VertexPIDType> metis_assignment(int64_t num_partition,
+    std::vector<idx_t> metis_assignment(int64_t num_partition,
                                                 int64_t num_iteration,
                                                 int64_t num_initpart,
                                                 float unbalance_val,
                                                 bool obj_cut,
-                                                std::span<IndptrType> vtxdist,
-                                                std::span<IndptrType> indptr,
-                                                std::span<VertexIDType> indices,
+                                                std::span<idx_t> vtxdist,
+                                                std::span<idx_t> indptr,
+                                                std::span<idx_t> indices,
                                                 std::span<WeightType> node_weight,
                                                 std::span<WeightType> edge_weight)
     {
-        VertexPIDType nparts = num_partition;
-        VertexPIDType nvtxs = indptr.size() - 1;
-        IndptrType num_edge = indices.size();
-        VertexIDType ncon = 1; // number of constraint
+        idx_t nparts = num_partition;
+        idx_t nvtxs = indptr.size() - 1;
+        idx_t num_edge = indices.size();
+        idx_t ncon = 1; // number of constraint
         if (node_weight.size())
         {
-            VertexIDType nvwgt = node_weight.size();
+            idx_t nvwgt = node_weight.size();
             ncon = nvwgt / nvtxs;
             std::cout << "nvwgt: " << nvwgt << " nvtxs: " << nvtxs << std::endl;
             assert(nvwgt % nvtxs == 0);
@@ -57,7 +57,7 @@ namespace pmetis
         //     auto tensor_opts = torch::TensorOptions().dtype(torch::kInt64).requires_grad(false);
         //     torch::Tensor ret = torch::empty(nvtxs, tensor_opts);
 
-        std::vector<VertexPIDType> ret(nvtxs);
+        std::vector<idx_t> ret(nvtxs);
         auto *part = ret.data();
 
         // std::vector<int64_t> ret(nvtxs, 0);
@@ -110,23 +110,23 @@ namespace pmetis
                                        options,
                                        &objval,
                                        part);
-
+        float obj_scale = 1.0;
         if (ewgt != nullptr) {
-            auto vol_scale = 1.0 * std::accumulate(ewgt, ewgt + num_edge, 0ul) / num_edge;
-            objval /= vol_scale;
+            obj_scale *= std::accumulate(ewgt, ewgt + num_edge, 0ul) / num_edge;
         }
+        objval /= obj_scale;
 
         if (obj_cut)
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
                       << num_edge << " edges into " << num_partition << " parts and "
-                      << "get " << objval << " edge cuts" << std::endl;
+                      << "get " << objval << " edge cuts with scale " << obj_scale << std::endl;
         }
         else
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
                       << num_edge << " edges into " << num_partition << " parts and "
-                      << "the communication volume is " << objval << std::endl;
+                      << "the communication volume is " << objval << " with scale " << obj_scale << std::endl;
         }
 
         switch (flag)

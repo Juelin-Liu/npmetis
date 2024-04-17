@@ -3,28 +3,29 @@
 #include <iostream>
 #include <parmetis.h>
 
-namespace pmetis
+namespace cppmetis
 {
-    std::vector<VertexPIDType> mpi_metis_assignment(int64_t num_partition,
-                                                    int64_t num_iteration,
-                                                    int64_t num_initpart,
-                                                    bool obj_cut,
-                                                    std::span<IndptrType> vtxdist,
-                                                    std::span<IndptrType> indptr,
-                                                    std::span<VertexIDType> indices,
-                                                    std::span<WeightType> node_weight,
-                                                    std::span<WeightType> edge_weight)
+    std::vector<idx_t> mpi_metis_assignment(int64_t num_partition,
+                                            int64_t num_iteration,
+                                            int64_t num_initpart,
+                                            float unbalance_val,
+                                            bool obj_cut,
+                                            std::span<idx_t> vtxdist,
+                                            std::span<idx_t> indptr,
+                                            std::span<idx_t> indices,
+                                            std::span<WeightType> node_weight,
+                                            std::span<WeightType> edge_weight)
     {
-        VertexPIDType nparts = num_partition;
-        VertexPIDType nvtxs = indptr.size() - 1;
-        IndptrType num_edge = indices.size();
+        idx_t nparts = num_partition;
+        idx_t nvtxs = indptr.size() - 1;
+        idx_t num_edge = indices.size();
         // ncon is used to specify the number of weights that each vertex has. It is also the number of balance
         // constraints that must be satisfied.
-        VertexIDType ncon = 1;
+        idx_t ncon = 1;
 
         if (node_weight.size())
         {
-            VertexIDType nvwgt = node_weight.size();
+            idx_t nvwgt = node_weight.size();
             ncon = nvwgt / nvtxs;
             // std::cout << "nvwgt: " << nvwgt << " nvtxs: " << nvtxs << std::endl;
             assert(nvwgt % nvtxs == 0);
@@ -43,7 +44,7 @@ namespace pmetis
         //     auto tensor_opts = torch::TensorOptions().dtype(torch::kInt64).requires_grad(false);
         //     torch::Tensor ret = torch::empty(nvtxs, tensor_opts);
 
-        std::vector<VertexPIDType> ret(nvtxs);
+        std::vector<idx_t> ret(nvtxs);
         auto part = ret.data();
 
         // std::vector<int64_t> ret(nvtxs, 0);
@@ -104,7 +105,7 @@ namespace pmetis
         // ubvec: An array of size ncon that is used to specify the imbalance tolerance for each vertex weight, with 1
         // being perfect balance and nparts being perfect imbalance. A value of 1.05 for each of the ncon
         // weights is recommended.
-        std::vector<real_t> ubvec(ncon, 1.05);
+        std::vector<real_t> ubvec(ncon, unbalance_val);
         MPI_Comm comm = MPI_COMM_WORLD;
         int flag = ParMETIS_V3_PartKway(vtxdist.data(),
                                         xadj,
@@ -122,17 +123,23 @@ namespace pmetis
                                         part,
                                         &comm);
 
+        float obj_scale = 1.0;
+        if (ewgt != nullptr) {
+            obj_scale *= std::accumulate(ewgt, ewgt + num_edge, 0ul) / num_edge;
+        }
+        objval /= obj_scale;
+
         if (obj_cut)
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
                       << num_edge << " edges into " << num_partition << " parts and "
-                      << "get " << objval << " edge cuts" << std::endl;
+                      << "get " << objval << " edge cuts with scale " << obj_scale << std::endl;
         }
         else
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
                       << num_edge << " edges into " << num_partition << " parts and "
-                      << "the communication volume is " << objval << std::endl;
+                      << "the communication volume is " << objval << " with scale " << obj_scale << std::endl;
         }
 
         switch (flag)

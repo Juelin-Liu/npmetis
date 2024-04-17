@@ -8,41 +8,22 @@
 #include <memory>
 #include <string>
 
-namespace pmetis
+namespace cppmetis
 {
-    struct Dataset
-    {
-        std::vector<IndptrType> vtxdist;
-        std::vector<VertexIDType> indptr;
-        std::vector<IndptrType> indices;
-        std::vector<WeightType> node_weight;
-        std::vector<WeightType> edge_weight;
-    };
-
-    struct Args
-    {
-        int64_t num_partition;
-        int64_t num_init_part;
-        int64_t num_iteration;
-        float unbalance_val;
-        bool use_cut;
-        std::string indptr_path;
-        std::string indices_path;
-        std::string node_weight_path;
-        std::string edge_weight_path;
-        std::string output_path;
-    };
-
     Args parse_args(int argc, const char **argv);
-    std::unique_ptr<Dataset> load_dataset(const Args& args);
+    DatasetPtr load_dataset(const Args& args);
+    std::vector<idx_t> expand_indptr(std::span<idx_t> indptr);
+    std::vector<idx_t> compact_indptr(std::span<idx_t> in_indptr,
+                                           std::span<uint8_t > flag);
 
-    std::vector<IndptrType> expand_indptr(std::span<IndptrType> indptr);
-    std::vector<IndptrType> compact_indptr(std::span<IndptrType> in_indptr,
-                                           std::span<uint8_t> flag);
+    DatasetPtr remove_zero_weight_edges(const DatasetPtr& dataset);
 
-    std::tuple<std::vector<IndptrType>, std::vector<VertexIDType>, std::vector<WeightType>> make_sym(
-        std::span<IndptrType> in_indptr,
-        std::span<VertexIDType> in_indices,
+    std::tuple<std::vector<idx_t>, std::vector<idx_t>, std::vector<WeightType>> make_sym(
+        std::span<idx_t> in_indptr,
+        std::span<idx_t> in_indices,
         std::span<WeightType> in_data);
 
+    // helper functions for distributed version
+    std::vector<idx_t> get_vtx_dist(const DatasetPtr &data, int world_size, bool balance_edge = true);
+    DatasetPtr get_local_data(const DatasetPtr& global, int rank, int world_size);
 }

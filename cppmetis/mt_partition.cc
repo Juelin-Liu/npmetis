@@ -9,7 +9,7 @@
 #include <mtmetis.h>
 #include <thread>
 
-namespace pmetis
+namespace cppmetis
 {
 
     std::vector<int64_t> mt_metis_assignment(int64_t num_partition,
@@ -17,7 +17,7 @@ namespace pmetis
                                              int64_t num_initpart,
                                              float unbalance_val,
                                              bool obj_cut,
-                                             std::span<IndptrType> vtxdist,
+                                             std::span<idx_t> vtxdist,
                                              std::span<int64_t> indptr,
                                              std::span<int64_t> indices,
                                              std::span<int64_t> node_weight,
@@ -29,7 +29,7 @@ namespace pmetis
         mtmetis_vtx_type ncon = 1; // number of constraint
         if (node_weight.size())
         {
-            VertexIDType nvwgt = node_weight.size();
+            idx_t nvwgt = node_weight.size();
             ncon = nvwgt / nvtxs;
             // std::cout << "nvwgt: " << nvwgt << " nvtxs: " << nvtxs << std::endl;
             assert(nvwgt % nvtxs == 0);
@@ -98,17 +98,23 @@ namespace pmetis
                                          &objval,
                                          part);
 
+        float obj_scale = 1.0;
+        if (ewgt != nullptr) {
+            obj_scale *= std::accumulate(ewgt, ewgt + num_edge, 0ul) / num_edge;
+        }
+        objval /= obj_scale;
+
         if (obj_cut)
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
                       << num_edge << " edges into " << num_partition << " parts and "
-                      << "get " << objval << " edge cuts" << std::endl;
+                      << "get " << objval << " edge cuts with scale " << obj_scale << std::endl;
         }
         else
         {
             std::cout << "Partition a graph with " << nvtxs << " nodes and "
                       << num_edge << " edges into " << num_partition << " parts and "
-                      << "the communication volume is " << objval << std::endl;
+                      << "the communication volume is " << objval << " with scale " << obj_scale << std::endl;
         }
 
         switch (flag)
