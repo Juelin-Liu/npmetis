@@ -121,8 +121,10 @@ namespace cppmetis
             edge_weight = cnpyMmap::npy_load(args.edge_weight_path);
             assert(edge_weight.num_vals == indices.num_vals);
             int64_t non_z_edges = non_zero_edges({edge_weight.data<WeightType>(), edge_weight.num_vals});
-            if (1.0 * non_z_edges / edge_weight.num_vals > 0.2)
+            if (1.0 * non_z_edges / edge_weight.num_vals < 0.2)
             {
+                std::cout << "Start edge pruning" << std::endl;
+
                 auto [pindptr, pindices, pedge_weight] = remove_zero_weight_edges(
                     {indptr.data<idx_t>(), indptr.num_vals},
                     {indices.data<idx_t>(), indices.num_vals},
@@ -211,7 +213,7 @@ namespace cppmetis
         assert(edge_weight.size() == indices.size());
         int64_t org_e_num = indices.size();
         int64_t new_e_num = non_zero_edges(edge_weight);
-        std::cout << "org_e_num" << org_e_num << " new_e_num" << new_e_num << " (" << 1.0 * new_e_num / org_e_num * 100
+        std::cout << "org_e_num: " << org_e_num << " new_e_num: " << new_e_num << " (" << 1.0 * new_e_num / org_e_num * 100
                   << "%)" << std::endl;
         std::vector<uint8_t> flag(org_e_num, 0);
         tbb::parallel_for(tbb::blocked_range<int64_t>(0, org_e_num),

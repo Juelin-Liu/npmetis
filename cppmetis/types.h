@@ -16,6 +16,7 @@ namespace cppmetis {
         std::vector<WeightType> node_weight;
         std::vector<WeightType> edge_weight;
     };
+    using DatasetPtr = std::unique_ptr<Dataset>;
 
     struct Args {
         int64_t num_partition;
@@ -29,7 +30,6 @@ namespace cppmetis {
         std::string edge_weight_path;
         std::string output_path;
     };
-    using DatasetPtr = std::unique_ptr<Dataset>;
 }
 
 namespace std {
