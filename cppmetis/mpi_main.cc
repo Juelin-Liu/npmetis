@@ -1,6 +1,6 @@
-#include <cnpy.h>
 #include "utils.h"
 #include "mpi_partition.h"
+#include "cnpy_mmap.h"
 
 using namespace cppmetis;
 enum tag
@@ -29,9 +29,7 @@ int main(int argc, const char** argv) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     Args args = parse_args(argc, argv);
-    auto global_data = load_dataset(args);
-    auto local_data = get_local_data(global_data, rank, world_size);
-    global_data.reset(nullptr);
+    auto local_data = get_local_data(args, rank, world_size);
     auto local_partition_map = mpi_metis_assignment(args, local_data);
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -63,7 +61,7 @@ int main(int argc, const char** argv) {
             int status = MPI_Recv(partition_map.data() + start_idx, recv_cnt, MPI_LONG, send_rank, tag::partition_map, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
             assert(status == MPI_SUCCESS);
         }
-        cnpy::npy_save(args.output_path, partition_map);
+        cnpyMmap::npy_save(args.output_path, partition_map);
     }
     MPI_Finalize();
 }

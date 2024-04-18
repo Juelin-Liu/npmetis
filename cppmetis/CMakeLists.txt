@@ -4,7 +4,7 @@ target_include_directories(main PRIVATE ${CMAKE_SOURCE_DIR}/third_party/build/in
 target_link_directories(main PRIVATE ${CMAKE_SOURCE_DIR}/third_party/build/lib)
 
 target_link_libraries(main PRIVATE metis GKlib)
-target_link_libraries(main PRIVATE cnpy)
+target_link_libraries(main PRIVATE cnpy_mmap)
 target_link_libraries(main PRIVATE tbb tbbmalloc)
 
 # Build mt_main 
@@ -15,7 +15,7 @@ if(OpenMP_CXX_FOUND)
     target_link_directories(mt_main PRIVATE ${CMAKE_SOURCE_DIR}/third_party/build/lib)
 
     target_link_libraries(mt_main PRIVATE mtmetis metis GKlib)
-    target_link_libraries(mt_main PRIVATE cnpy)
+    target_link_libraries(mt_main PRIVATE cnpy_mmap)
     target_link_libraries(mt_main PRIVATE tbb tbbmalloc)
     target_link_libraries(mt_main PUBLIC OpenMP::OpenMP_CXX)
 endif()
@@ -37,6 +37,6 @@ endif()
      target_link_libraries(mpi_main PUBLIC ${MPI_LIBRARIES} )
 
      target_link_libraries(mpi_main PUBLIC parmetis metis GKlib)
-     target_link_libraries(mpi_main PUBLIC cnpy)
+     target_link_libraries(mpi_main PUBLIC cnpy_mmap)
      target_link_libraries(mpi_main PUBLIC tbb tbbmalloc)
  endif()

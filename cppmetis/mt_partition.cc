@@ -8,6 +8,7 @@
 #include <iostream>
 #include <mtmetis.h>
 #include <thread>
+#include <numeric>
 
 namespace cppmetis
 {

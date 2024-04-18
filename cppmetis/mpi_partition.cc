@@ -1,5 +1,6 @@
 #include "partition.h"
 #include <cassert>
+#include <numeric>
 #include <iostream>
 #include <parmetis.h>
 
