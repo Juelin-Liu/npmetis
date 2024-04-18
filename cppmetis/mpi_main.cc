@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "mpi_partition.h"
 #include "cnpy_mmap.h"
+#include <oneapi/tbb/global_control.h>
 
 using namespace cppmetis;
 enum tag
@@ -23,6 +24,7 @@ void log(int rank, const std::string& name, const std::vector<idx_t> &vec)
 }
 
 int main(int argc, const char** argv) {
+    oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, 1); // limit to one thread per process
     int rank{0}, world_size{0};
     MPI_Init(&argc, const_cast<char ***>(&argv));
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);

@@ -18,11 +18,13 @@ make install
 popd
 
 # build ParMETIS
- pushd ${SCRIPT_DIR}/third_party/parmetis/
- make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
- make -j
- make install
- popd
+if test -d ${SCRIPT_DIR}/third_party/parmetis/; then
+    pushd ${SCRIPT_DIR}/third_party/parmetis/
+    make config prefix=${SCRIPT_DIR}/third_party/build shared=1 #gdb=1 debug=1
+    make -j
+    make install
+    popd
+fi
 
 # build MT-METIS
 pushd ${SCRIPT_DIR}/third_party/mt-metis
@@ -35,7 +37,7 @@ popd
 mkdir -p ${SCRIPT_DIR}/third_party/oneTBB/build
 pushd ${SCRIPT_DIR}/third_party/oneTBB/build 
 cmake -DCMAKE_BUILD_TYPE=Release -DTBB_TEST=OFF -DCMAKE_INSTALL_PREFIX=${SCRIPT_DIR}/third_party/build .. 
-cmake --build . -j 
+cmake --build . -j
 cmake --install . 
 popd
 
@@ -48,4 +50,4 @@ popd
 #popd
 
 rm -rf build
-cmake -B build -GNinja -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
+cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build -j
