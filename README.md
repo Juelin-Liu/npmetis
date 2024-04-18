@@ -67,7 +67,9 @@ To use the distributed version, change `./bin/main` with `mpirun -np [number of 
 
 All the input files must end with .npy and are NumPy arrays stored in int64_t format.
 
-Metis assumes the graph is symmetrical, meaning that if `(u -> v)` then `(v -> u)` and the graph must be undirected.
+Metis assumes:
+1. The graph must be undirected (symmetrical), meaning that if `(u -> v)` then `(v -> u)`. 
+2. The graph has no self-loops. 
 
 `indptr` file must be ended with either `indptr_sym.npy` or `indptr_xsym.npy`. 
 1. If the `indptr` file ends with `indptr_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
