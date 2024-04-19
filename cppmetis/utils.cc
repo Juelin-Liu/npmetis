@@ -72,7 +72,7 @@ namespace cppmetis
         return (index != std::string::npos) && (index == str.size() - suffix.size());
     }
 
-    Args parse_args(int argc, const char **argv)
+    Args parse_args(int argc, const char **argv, bool show_cmd)
     {
         auto cmd = CommandLine(argc, argv);
         Args args;
@@ -94,16 +94,19 @@ namespace cppmetis
         assert(args.num_partition > 0);
         assert(args.unbalance_val <= args.num_partition);
         assert(args.unbalance_val >= 1);
-        // std::cout << "Cmd options:\n";
-        // std::cout << "num_partition: " << args.num_partition << std::endl;
-        // std::cout << "num_init_part: " << args.num_init_part << std::endl;
-        // std::cout << "num_iteration: " << args.num_iteration << std::endl;
-        // std::cout << "unbalance_val: " << args.unbalance_val << std::endl;
-        // std::cout << "use_cut: " << args.use_cut << std::endl;
-        // std::cout << "indptr: " << args.indptr_path << std::endl;
-        // std::cout << "indices: " << args.indices_path << std::endl;
-        // std::cout << "node weight: " << args.node_weight_path << std::endl;
-        // std::cout << "edge weight: " << args.edge_weight_path << std::endl;
+
+        if (show_cmd) {
+            std::cout << "Cmd options:\n";
+            std::cout << "num_partition: " << args.num_partition << std::endl;
+            std::cout << "num_init_part: " << args.num_init_part << std::endl;
+            std::cout << "num_iteration: " << args.num_iteration << std::endl;
+            std::cout << "unbalance_val: " << args.unbalance_val << std::endl;
+            std::cout << "use_cut: " << args.use_cut << std::endl;
+            std::cout << "indptr: " << args.indptr_path << std::endl;
+            std::cout << "indices: " << args.indices_path << std::endl;
+            std::cout << "node weight: " << args.node_weight_path << std::endl;
+            std::cout << "edge weight: " << args.edge_weight_path << std::endl;
+        }
         return args;
     };
 
@@ -453,33 +456,6 @@ namespace cppmetis
         return vtxdist;
     };
 
-    // std::vector<idx_t> get_vtx_dist(const DatasetPtr &data, int world_size, bool balance_edge)
-    // {
-    //     std::vector<idx_t> vtxdist(1, 0);
-    //     idx_t num_edges = data->indices.size();
-    //     idx_t num_nodes = data->indptr.size() - 1;
-    //     for (int r = 0; r < world_size; r++)
-    //     {
-    //         if (r == world_size - 1)
-    //         {
-    //             vtxdist.push_back(num_nodes);
-    //         }
-    //         else if (balance_edge)
-    //         {
-    //             idx_t loc_num_edges = (num_edges / world_size) * (r + 1);
-    //             auto begin = data->indptr.begin();
-    //             auto itr = std::upper_bound(data->indptr.begin(), data->indptr.end(), loc_num_edges);
-    //             vtxdist.push_back(itr - begin);
-    //         }
-    //         else
-    //         {
-    //             vtxdist.push_back(num_nodes / world_size * (r + 1));
-    //         }
-    //     }
-    //     data->vtxdist = vtxdist;
-    //     return vtxdist;
-    // };
-
     DatasetPtr get_local_data(const Args &args, int rank, int world_size)
     {
         cnpyMmap::NpyArray indptr = cnpyMmap::npy_load(args.indptr_path);
@@ -489,7 +465,6 @@ namespace cppmetis
 
         if (!args.edge_weight_path.empty())
         {
-            std::cout << "Use edge weight: " << args.edge_weight_path << std::endl;
             edge_weight = cnpyMmap::npy_load(args.edge_weight_path);
             assert(edge_weight.num_vals == indices.num_vals);
         }
@@ -497,6 +472,7 @@ namespace cppmetis
         if (!args.node_weight_path.empty())
         {
             node_weight = cnpyMmap::npy_load(args.node_weight_path);
+            assert(node_weight.num_vals == indptr.num_vals - 1);
         }
 
         auto ret = std::make_unique<Dataset>();
@@ -535,42 +511,4 @@ namespace cppmetis
         assert(ret->indptr.at(end_v_idx - start_v_idx) == ret->indices.size());
         return std::move(ret);
     };
-
-    // DatasetPtr get_local_data(const DatasetPtr &data, int rank, int world_size)
-    // {
-    //     auto ret = std::make_unique<Dataset>();
-    //     ret->vtxdist = get_vtx_dist(data, world_size);
-    //     idx_t total_e_num = data->indices.size();
-    //     idx_t total_v_num = data->indptr.size() - 1;
-    //     idx_t start_v_idx = ret->vtxdist.at(rank);
-    //     idx_t end_v_idx = ret->vtxdist.at(rank + 1);
-    //     idx_t start_e_idx = data->indptr.at(start_v_idx);
-    //     idx_t end_e_idx = data->indptr.at(end_v_idx);
-
-    //     // copy node_weight
-    //     if (data->node_weight.size() == total_v_num)
-    //     {
-    //         ret->node_weight = std::vector<WeightType>(data->node_weight.begin() + start_v_idx,
-    //                                                    data->node_weight.begin() + end_v_idx);
-    //     }
-    //     // copy edge_weight
-    //     if (data->edge_weight.size() == total_e_num)
-    //     {
-    //         ret->edge_weight = std::vector<WeightType>(data->edge_weight.begin() + start_e_idx,
-    //                                                    data->edge_weight.begin() + end_e_idx);
-    //     }
-    //     // copy indices
-    //     ret->indices = std::vector<WeightType>(data->indices.begin() + start_e_idx,
-    //                                            data->indices.begin() + end_e_idx);
-
-    //     // compute local indptr (start from 0)
-    //     for (idx_t i = start_v_idx; i <= end_v_idx; i++)
-    //         ret->indptr.push_back(data->indptr.at(i) - start_e_idx);
-
-    //     assert(ret->vtxdist.size() == world_size + 1);
-    //     assert(ret->vtxdist.at(world_size) == total_v_num);
-    //     assert(ret->indptr.at(0) == 0);
-    //     assert(ret->indptr.at(end_v_idx - start_v_idx) == ret->indices.size());
-    //     return std::move(ret);
-    // };
 }

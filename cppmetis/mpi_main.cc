@@ -23,6 +23,20 @@ void log(int rank, const std::string& name, const std::vector<idx_t> &vec)
     std::cout << log << std::endl;
 }
 
+void log(int rank, int world_size, std::string msg) {
+    MPI_Barrier(MPI_COMM_WORLD);
+   int log_rank = 0;
+   while (log_rank < world_size)
+   {
+       if (rank == log_rank)
+       {
+           std::cout << msg << std::endl;
+       };
+       log_rank++;
+       MPI_Barrier(MPI_COMM_WORLD);
+   }
+};
+
 int main(int argc, const char** argv) {
     oneapi::tbb::global_control global_limit(oneapi::tbb::global_control::max_allowed_parallelism, 1); // limit to one thread per process
     int rank{0}, world_size{0};
@@ -33,37 +47,31 @@ int main(int argc, const char** argv) {
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     int name_len;
     MPI_Get_processor_name(processor_name, &name_len);
+    Args args = parse_args(argc, argv, (rank==0));
 
-    // Print the information from each process
-    std::cout << "Hello from process " << rank << " of " << world_size
-              << " on host " << processor_name << std::endl;
+    {
+        std::stringstream ss;
+        ss << "Rank " << rank << " of " << world_size << " on host " << processor_name;
+        log(rank, world_size, ss.str());
+    }
 
-    Args args = parse_args(argc, argv);
     auto local_data = get_local_data(args, rank, world_size);
 
-    // Print the information from each process
-    std::cout << "Rank " << rank << " loaded dataset " << std::endl;
+    {
+        std::stringstream ss;
+        ss << "Rank " << rank << " loaded dataset " ;
+        log(rank, world_size, ss.str());
+    }
 
     auto local_partition_map = mpi_metis_assignment(args, local_data);
 
-    // Print the information from each process
-    std::cout << "Rank " << rank << " finished metis partitioning " << std::endl;
+    {
+        std::stringstream ss;
+        ss << "Rank " << rank << " finished metis partitioning ";
+        log(rank, world_size, ss.str());
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
-
-//    int log_rank = 0;
-//    while (log_rank < world_size)
-//    {
-//        if (rank == log_rank)
-//        {
-//            log(rank, "xadj", local_data->indptr);
-//            log(rank, "adjncy", local_data->indices);
-//            log(rank, "vtxdist", local_data->vtxdist);
-//            log(rank, "local_partition_map", local_partition_map);
-//        };
-//        log_rank++;
-//        MPI_Barrier(MPI_COMM_WORLD);
-//    }
 
     MPI_Request partition_map_send_request;
     MPI_Isend(local_partition_map.data(), local_partition_map.size(), MPI_LONG, 0, tag::partition_map, MPI_COMM_WORLD, &partition_map_send_request);
