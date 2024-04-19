@@ -29,10 +29,26 @@ int main(int argc, const char** argv) {
     MPI_Init(&argc, const_cast<char ***>(&argv));
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // Get the processor name (hostname)
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+    MPI_Get_processor_name(processor_name, &name_len);
+
+    // Print the information from each process
+    std::cout << "Hello from process " << rank << " of " << world_size
+              << " on host " << processor_name << std::endl;
 
     Args args = parse_args(argc, argv);
     auto local_data = get_local_data(args, rank, world_size);
+
+    // Print the information from each process
+    std::cout << "Rank " << rank << " loaded dataset " << std::endl;
+
     auto local_partition_map = mpi_metis_assignment(args, local_data);
+
+    // Print the information from each process
+    std::cout << "Rank " << rank << " finished metis partitioning " << std::endl;
+
     MPI_Barrier(MPI_COMM_WORLD);
 
 //    int log_rank = 0;
