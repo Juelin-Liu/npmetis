@@ -24,20 +24,29 @@ C++ compiler (GCC >=9 ), Ninja, CMake.
 OpenMP
 
 ## Distributed:
-MPI, possible solution:
+MPI is required, recommend using MPICH v4.2 and above for it supports MPI standard v4.1, which is necessary for handling large graphs with more than 2 billion edges or nodes.
+
 ```bash
-sudo apt install mpich -y
+cd /tmp
+wget https://www.mpich.org/static/downloads/4.2.1/mpich-4.2.1.tar.gz
+tar -xvf mpich-4.2.1.tar.gz
+cd mpich-4.2.1
+export MPI_INSTALL_PREFIX=${HOME}/local # change this to your prefered place
+./configure --prefix=$MPI_INSTALL_PREFIX --with-pmi=pmix # this might take a while
+make > m.txt 2>&1 # this might take a while
+make install
+# add MPI to your path
+export PATH=${MPI_INSTALL_PREFIX}/bin:$PATH
 ```
 
 # How to compile:
-
-For single-threaded and multiple-threaded binaries:
+To build main binaries:
 ```bash
 ./build.sh
 ```
 
-To use ParMetis (distributed), you must agree to its [Licence](https://github.com/KarypisLab/ParMETIS/blob/main/LICENSE).
-First download its source code from Github:
+To use ParMETIS (distributed), you must agree to its [Licence](https://github.com/KarypisLab/ParMETIS/blob/main/LICENSE).
+<!-- First download its source code from Github:
 ```bash
 wget https://github.com/KarypisLab/ParMETIS/archive/refs/heads/main.zip -O third_party/parmetis.zip
 pushd third_party && unzip parmetis.zip && mv ParMETIS-main parmetis && rm parmetis.zip && popd
@@ -45,13 +54,13 @@ pushd third_party && unzip parmetis.zip && mv ParMETIS-main parmetis && rm parme
 Then, uncomment the code blocks in `build.sh` after `build ParMETIS`, also uncomment the part in `cppmetis/CMakeLists.txt` after `Build mpi_main start`
 `.
 
-The output binary files will be in the `./bin` directory.
+The output binary files will be in the `./bin` directory. -->
 
-# How to use:
+# How to use METIS binaries provided in this project:
 ```shell
 ./bin/main \
 --num_partition="[number of partitions (default 4)]" \
---num_init_part="[number of initial partitions (default 4)]" \
+--num_init_part="[number of initial partitions (default 1)]" \
 --num_iteration="[number of iterations (default 10)]" \
 --unbalance_val="[unbalance tolerance of each partition (default 1.05)]" \
 --indptr="[path to indptr file (Required)]" \
@@ -61,26 +70,43 @@ The output binary files will be in the `./bin` directory.
 --edge_weight="[path to edge_weight file (Optional)]" \
 ```
 
-To use the multi-threaded version, change `./bin/main` with `./bin/mt_main`.
+Alternatively, to use the multi-threaded version, change `./bin/main` with `./bin/mt_main`.
 
-To use the distributed version, change `./bin/main` with `mpirun -np [number of process] ./bin/mpi_main`. Note, `./bin/mpi_main` is buggy and any contribution is welcome! :smile:
+To use the distributed version, change `./bin/main` with `mpirun -np [number of process] ./bin/mpi_main`. 
 
 All the input files must end with .npy and are NumPy arrays stored in int64_t format.
 
-Metis assumes:
-1. The graph must be undirected (symmetrical), meaning that if `(u -> v)` then `(v -> u)`. 
+Metis requires:
+1. The graph is undirected (symmetrical), meaning that if `(u -> v)` then `(v -> u)`. 
 2. The graph has no self-loops. 
 
-`indptr` file must be ended with either `indptr_sym.npy` or `indptr_xsym.npy`. 
-1. If the `indptr` file ends with `indptr_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
-2. If the `indptr` file ends with `indptr_sym.npy`, it will be provided to Metis directly.
+So the input graph must be symmetric and undirected with no self-loops.
 
-`indices` file must end with either `indices_sym.npy` or `indices_xsym.npy`. 
-1. If the `indices` file ends with `indices_xsym.npy`, additional steps will be taken to convert it into symmetrical graphs.
-2. If the `indices` file ends with `indices_sym.npy`, it will be provided to Metis directly.
+`indptr`: Indptr of the graph, assume ids are 0 indexed and contiguous.
 
-`node_weight`, if provided, must have a length equal to the number of nodes in the graph.
+`indices`: Adjacency lists in an array, must contain edges in both directions.
 
-`edge_weight`, if provided, must have a length equal to the number of edges in the graph.
+`node_weight`: If provided, must have a length equal to the number of nodes in the graph.
 
-`output` path must end with `.npy` and the result will be an int64_t NumPy array.
+`edge_weight`: If provided, must have a length equal to the number of edges in the graph.
+
+`output`: The path to save the result, must end with `.npy`, the result will be saved as an int64_t NumPy array.
+
+# Graph Preprocessing
+We also provide utilities `to_sym` for you to convert directed graphs to undirected graphs.
+
+```shell
+./bin/to_sym \
+--indptr="[path to indptr file (Required)]" \
+--indices="[path to indices file (Required)]" \
+--edge_weight="[path to edge_weight file (Optional)]" \
+--output="[path to output directory (Required)]" \
+```
+
+Suppose the output directory is `./output`, the resulting symmetrical graph will be saved as:
+```
+./output/
+   indptr_sym.npy # indptr for the symmetrical graph
+   indices_sym.npy # indices for the symmetrical graph
+   edge_weight_sym.npy # edge weights for the symmetrical graph
+```

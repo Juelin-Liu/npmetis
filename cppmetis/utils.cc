@@ -107,7 +107,7 @@ namespace cppmetis
         return args;
     };
 
-    DatasetPtr load_dataset(const Args &args)
+    DatasetPtr load_dataset(const Args &args, bool to_sym)
     {
         cnpyMmap::NpyArray indptr = cnpyMmap::npy_load(args.indptr_path);
         cnpyMmap::NpyArray indices = cnpyMmap::npy_load(args.indices_path);
@@ -117,45 +117,25 @@ namespace cppmetis
 
         if (!args.edge_weight_path.empty())
         {
-            std::cout << "Use edge weight: " << args.edge_weight_path << std::endl;
             edge_weight = cnpyMmap::npy_load(args.edge_weight_path);
             assert(edge_weight.num_vals == indices.num_vals);
-            int64_t non_z_edges = non_zero_edges({edge_weight.data<WeightType>(), edge_weight.num_vals});
-            if (1.0 * non_z_edges / edge_weight.num_vals < 0.2)
-            {
-                std::cout << "Start edge pruning" << std::endl;
-
-                auto [pindptr, pindices, pedge_weight] = remove_zero_weight_edges(
-                    {indptr.data<idx_t>(), indptr.num_vals},
-                    {indices.data<idx_t>(), indices.num_vals},
-                    {edge_weight.data<WeightType>(), edge_weight.num_vals});
-                ret->indptr = std::move(pindptr);
-                ret->indices = std::move(pindices);
-                ret->edge_weight = std::move(pindptr);
-            }
-            else
-            {
-                ret->indptr = indptr.as_vec<idx_t>();
-                ret->indices = indices.as_vec<idx_t>();
-                ret->edge_weight = edge_weight.as_vec<idx_t>();
-            }
         }
 
         if (!args.node_weight_path.empty())
         {
             node_weight = cnpyMmap::npy_load(args.node_weight_path);
-            ret->node_weight = node_weight.as_vec<WeightType>();
+            assert(node_weight.num_vals == indptr.num_vals);
         }
 
-        if (ends_with(args.indptr_path, "indptr_xsym.npy"))
-        {
-            assert(ends_with(args.indices_path, "indices_xsym.npy"));
-            return make_sym(ret);
-        }
-        else
-        {
-            assert(ends_with(args.indices_path, "indices_sym.npy"));
-            return ret;
+        ret->indptr = indptr.as_vec<idx_t>();
+        ret->indices = indices.as_vec<idx_t>();
+        ret->edge_weight = edge_weight.as_vec<WeightType>();
+        ret->node_weight = node_weight.as_vec<WeightType>();
+
+        if (to_sym) {
+            return std::move(make_sym(ret));
+        } else {
+            return std::move(ret);
         }
     }
 

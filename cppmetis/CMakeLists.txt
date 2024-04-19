@@ -1,3 +1,12 @@
+# Build to_sym
+add_executable(to_sym to_sym.cc utils.cc)
+target_include_directories(to_sym PRIVATE ${CMAKE_SOURCE_DIR}/third_party/build/include)
+target_link_directories(to_sym PRIVATE ${CMAKE_SOURCE_DIR}/third_party/build/lib)
+
+# target_link_libraries(to_sym PRIVATE metis GKlib)
+target_link_libraries(to_sym PRIVATE cnpy_mmap)
+target_link_libraries(to_sym PRIVATE tbb tbbmalloc)
+
 # Build main 
 add_executable(main main.cc utils.cc partition.cc)
 target_include_directories(main PRIVATE ${CMAKE_SOURCE_DIR}/third_party/build/include)

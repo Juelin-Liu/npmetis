@@ -9,9 +9,9 @@
 namespace cppmetis
 {
     Args parse_args(int argc, const char **argv);
-    DatasetPtr load_dataset(const Args &args);
-    DatasetPtr make_sym(const DatasetPtr &dataset);
+    DatasetPtr load_dataset(const Args &args, bool to_sym);
     DatasetPtr get_local_data(const Args &args, int rank, int world_size);
+    DatasetPtr make_sym(const DatasetPtr &dataset);
 
     std::vector<idx_t> expand_indptr(std::span<idx_t> indptr);
     std::vector<idx_t> compact_indptr(std::span<idx_t> in_indptr,
