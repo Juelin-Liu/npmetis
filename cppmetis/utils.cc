@@ -78,7 +78,7 @@ namespace cppmetis
         Args args;
 
         cmd.get_cmd_line_argument<int64_t>("num_partition", args.num_partition, 4);
-        cmd.get_cmd_line_argument<int64_t>("num_init_part", args.num_init_part, 4);
+        cmd.get_cmd_line_argument<int64_t>("num_init_part", args.num_init_part, 1);
         cmd.get_cmd_line_argument<int64_t>("num_iteration", args.num_iteration, 10);
         cmd.get_cmd_line_argument<float>("unbalance_val", args.unbalance_val, 1.05);
         args.use_cut = cmd.check_cmd_line_flag("use_cut");
@@ -94,16 +94,16 @@ namespace cppmetis
         assert(args.num_partition > 0);
         assert(args.unbalance_val <= args.num_partition);
         assert(args.unbalance_val >= 1);
-        std::cout << "Cmd options:\n";
-        std::cout << "num_partition: " << args.num_partition << std::endl;
-        std::cout << "num_init_part: " << args.num_init_part << std::endl;
-        std::cout << "num_iteration: " << args.num_iteration << std::endl;
-        std::cout << "unbalance_val: " << args.unbalance_val << std::endl;
-        std::cout << "use_cut: " << args.use_cut << std::endl;
-        std::cout << "indptr: " << args.indptr_path << std::endl;
-        std::cout << "indices: " << args.indices_path << std::endl;
-        std::cout << "node weight: " << args.node_weight_path << std::endl;
-        std::cout << "edge weight: " << args.edge_weight_path << std::endl;
+        // std::cout << "Cmd options:\n";
+        // std::cout << "num_partition: " << args.num_partition << std::endl;
+        // std::cout << "num_init_part: " << args.num_init_part << std::endl;
+        // std::cout << "num_iteration: " << args.num_iteration << std::endl;
+        // std::cout << "unbalance_val: " << args.unbalance_val << std::endl;
+        // std::cout << "use_cut: " << args.use_cut << std::endl;
+        // std::cout << "indptr: " << args.indptr_path << std::endl;
+        // std::cout << "indices: " << args.indices_path << std::endl;
+        // std::cout << "node weight: " << args.node_weight_path << std::endl;
+        // std::cout << "edge weight: " << args.edge_weight_path << std::endl;
         return args;
     };
 
@@ -141,18 +141,28 @@ namespace cppmetis
 
     DatasetPtr make_sym(const DatasetPtr &dataset)
     {
-        std::span<WeightType> edge_weight_span;
+        std::tuple<std::vector<idx_t>, std::vector<idx_t>, std::vector<WeightType>> ret;
+        if (dataset->edge_weight.size() == dataset->indices.size()) {
+            auto [pruned_indptr, pruned_indice, pruned_edge_weight] = remove_zero_weight_edges(dataset->indptr, dataset->indices, dataset->edge_weight);
+            auto [sym_indptr, sym_indice, sym_edge_weight] = make_sym(pruned_indptr, pruned_indice, pruned_edge_weight);
+            auto ret = std::make_unique<Dataset>();
+            ret->indptr = std::move(sym_indptr);
+            ret->indices = std::move(sym_indice);
+            ret->edge_weight = std::move(sym_edge_weight);
+            ret->node_weight = dataset->node_weight;
+            ret->vtxdist = dataset->vtxdist;
+            return std::move(ret);
+        } else {
+            auto [sym_indptr, sym_indice, sym_edge_weight] = make_sym(dataset->indptr, dataset->indices, dataset->edge_weight);
+            auto ret = std::make_unique<Dataset>();
+            ret->indptr = std::move(sym_indptr);
+            ret->indices = std::move(sym_indice);
+            ret->edge_weight = std::move(sym_edge_weight);
+            ret->node_weight = dataset->node_weight;
+            ret->vtxdist = dataset->vtxdist;
+            return std::move(ret);
+        }
 
-        auto [sym_indptr, sym_indice, sym_edge_weight] = make_sym(dataset->indptr, dataset->indices, dataset->edge_weight);
-
-        auto ret = std::make_unique<Dataset>();
-
-        ret->indptr = std::move(sym_indptr);
-        ret->indices = std::move(sym_indice);
-        ret->edge_weight = std::move(sym_edge_weight);
-        ret->node_weight = dataset->node_weight;
-        ret->vtxdist = dataset->vtxdist;
-        return std::move(ret);
     };
 
     int64_t non_zero_edges(std::span<idx_t> edge_weight)
