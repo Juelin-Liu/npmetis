@@ -33,7 +33,7 @@ tar -xvf mpich-4.2.1.tar.gz
 cd mpich-4.2.1
 export MPI_INSTALL_PREFIX=${HOME}/local # change this to your prefered place
 ./configure --prefix=$MPI_INSTALL_PREFIX --with-pmi=pmix # this might take a while
-make > m.txt 2>&1 # this might take a while
+make -j > m.txt 2>&1 # this might take a while
 make install
 # add MPI to your path
 export PATH=${MPI_INSTALL_PREFIX}/bin:$PATH
