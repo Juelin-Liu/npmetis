@@ -86,9 +86,9 @@ So the input graph must be symmetric and undirected with no self-loops.
 
 `indices`: Adjacency lists in an array, must contain edges in both directions.
 
-`node_weight`: If provided, must have a length equal to the number of nodes in the graph.
+`node_weight`: If provided, must have a length equal to the number of nodes in the graph. All weights should be greater than 0 (no zero entries).
 
-`edge_weight`: If provided, must have a length equal to the number of edges in the graph.
+`edge_weight`: If provided, must have a length equal to the number of edges in the graph. All weights should be greater than 0 (no zero entries).
 
 `output`: The path to save the result, must end with `.npy`, the result will be saved as an int64_t NumPy array.
 
