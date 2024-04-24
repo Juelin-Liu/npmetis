@@ -86,7 +86,7 @@ So the input graph must be symmetric and undirected with no self-loops.
 
 `indices`: Adjacency lists in an array, must contain edges in both directions.
 
-`node_weight`: If provided, must have a length equal to the number of nodes in the graph. All weights should be greater than 0 (no zero entries).
+`node_weight`: If provided, each node in the graph should have the same number of weights. 
 
 `edge_weight`: If provided, must have a length equal to the number of edges in the graph. All weights should be greater than 0 (no zero entries).
 
