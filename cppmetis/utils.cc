@@ -127,7 +127,7 @@ namespace cppmetis
         if (!args.node_weight_path.empty())
         {
             node_weight = cnpyMmap::npy_load(args.node_weight_path);
-            assert(node_weight.num_vals == indptr.num_vals);
+            assert(node_weight.num_vals % (indptr.num_vals - 1) == 0);
         }
 
         ret->indptr = indptr.as_vec<idx_t>();
