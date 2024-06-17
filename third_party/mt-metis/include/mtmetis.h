@@ -10,6 +10,7 @@
 
 
 
+#define MTMETIS_64BIT_EDGES
 
 #ifndef MTMETIS_H
 #define MTMETIS_H
