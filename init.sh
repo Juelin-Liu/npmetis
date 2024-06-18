@@ -4,19 +4,19 @@ git submodule update --init --recursive
 
 rm -rf ${SCRIPT_DIR}/third_party/build
 
-# # build GKlib
-# pushd ${SCRIPT_DIR}/third_party/GKlib
-# make config prefix=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
-# make -j 
-# make install 
-# popd
+# build GKlib
+pushd ${SCRIPT_DIR}/third_party/GKlib
+make config prefix=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
+make -j 
+make install 
+popd
 
-# # build METIS
-# pushd ${SCRIPT_DIR}/third_party/metis
-# make config prefix=${SCRIPT_DIR}/third_party/build i64=1 gklib_path=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
-# make -j
-# make install
-# popd
+# build METIS
+pushd ${SCRIPT_DIR}/third_party/metis
+make config prefix=${SCRIPT_DIR}/third_party/build i64=1 gklib_path=${SCRIPT_DIR}/third_party/build #gdb=1 debug=1
+make -j
+make install
+popd
 
 # # build ParMETIS
 # if test -d ${SCRIPT_DIR}/third_party/parmetis/; then

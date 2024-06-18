@@ -9,9 +9,16 @@
 namespace std {
     using namespace tcb;
 }
+namespace pymetis
+{
+ // mt-metis
+ using id_t=uint32_t;
+ using idx_t=uint64_t;
+ using wgt_t=int64_t;
+ 
+ // metis
+ using metis_idx_t = int64_t;
+}
 
-#define id_t uint32_t
-#define idx_t uint64_t
-#define wgt_t int64_t
 
 #endif //CPPMETIS_COMMON_H
