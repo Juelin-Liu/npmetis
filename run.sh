@@ -1,7 +1,7 @@
 #!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-graph_name=orkut
+graph_name=friendster
 sym_type=sym
 data_dir=/data/juelin/project/asplos25/dgl/dataset/graph/${graph_name}
 output_dir=${SCRIPT_DIR}/partition_maps/${graph_name}

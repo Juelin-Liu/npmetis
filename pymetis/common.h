@@ -12,6 +12,6 @@ namespace std {
 
 #define id_t uint32_t
 #define idx_t uint64_t
-#define wgt_t int32_t
+#define wgt_t int64_t
 
 #endif //CPPMETIS_COMMON_H

@@ -1,3 +1,5 @@
+#define MTMETIS_64BIT_WEIGHTS
+#define MTMETIS_64BIT_EDGES
 #include "mt_metis_assignment.h"
 #include <cassert>
 #include <iostream>
@@ -13,10 +15,10 @@ namespace pymetis
                                              int64_t num_initpart,
                                              float unbalance_val,
                                              bool obj_cut,
-                                             std::span<uint64_t> indptr,
-                                             std::span<uint32_t> indices,
-                                             std::span<int32_t> node_weight,
-                                             std::span<int32_t> edge_weight)
+                                             std::span<idx_t> indptr,
+                                             std::span<id_t> indices,
+                                             std::span<wgt_t> node_weight,
+                                             std::span<wgt_t> edge_weight)
     {
         const mtmetis_vtx_type nparts = num_partition;
         const mtmetis_vtx_type nvtxs = indptr.size() - 1;
@@ -34,13 +36,13 @@ namespace pymetis
             assert(edge_weight.size() == num_edge);
         }
 
-        std::vector<uint32_t> ret(nvtxs);
-        auto part = reinterpret_cast<uint32_t *>(ret.data());
-        auto xadj = reinterpret_cast<uint64_t *>(indptr.data());
-        auto adjncy = reinterpret_cast<const uint32_t *>(indices.data());
+        std::vector<id_t> ret(nvtxs);
+        auto part = reinterpret_cast<id_t *>(ret.data());
+        auto xadj = reinterpret_cast<idx_t *>(indptr.data());
+        auto adjncy = reinterpret_cast<const id_t *>(indices.data());
 
-        int32_t *vwgt = node_weight.empty() ? nullptr :  node_weight.data();
-        int32_t *ewgt = edge_weight.empty() ? nullptr : edge_weight.data();
+        wgt_t *vwgt = node_weight.empty() ? nullptr :  node_weight.data();
+        wgt_t *ewgt = edge_weight.empty() ? nullptr : edge_weight.data();
 
         mtmetis_wgt_type objval = 0;
         std::vector<double> options(MTMETIS_NOPTIONS, MTMETIS_VAL_OFF);
@@ -48,7 +50,9 @@ namespace pymetis
         options[MTMETIS_OPTION_NITER] = num_iteration;
         options[MTMETIS_OPTION_NINITSOLUTIONS] = num_initpart;
         options[MTMETIS_OPTION_NPARTS] = nparts;
-        options[MTMETIS_OPTION_TIME] = 0;
+        options[MTMETIS_OPTION_VERBOSITY] = MTMETIS_VERBOSITY_HIGH;
+        options[MTMETIS_OPTION_TIME] = 1;
+        options[MTMETIS_OPTION_IGNORE] = MTMETIS_IGNORE_NONE;
         // tpwgts: array of size ncon × nparts that is used to specify the fraction of vertex weight that should
         // be distributed to each sub-domain for each balance constraint. If all of the sub-domains are to be of
         // the same size for every vertex weight, then each of the ncon ×nparts elements should be set to

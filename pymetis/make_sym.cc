@@ -267,7 +267,7 @@ namespace pymetis {
                                           };
                                       }
 
-                                      wgt_t d = (u_v_data + v_u_data) / 2;
+                                      wgt_t d = u_v_data + v_u_data;
                                       edge_vec.at(i * 2) = {v, u, d};
                                       edge_vec.at(i * 2 + 1) = {u, v, d};
                                   }

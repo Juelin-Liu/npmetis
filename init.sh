@@ -1,5 +1,6 @@
 #!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+git submodule update --init --recursive
 
 rm -rf ${SCRIPT_DIR}/third_party/build
 
@@ -28,7 +29,7 @@ rm -rf ${SCRIPT_DIR}/third_party/build
 
 # build MT-METIS
 pushd ${SCRIPT_DIR}/third_party/mt-metis
-./configure --prefix=${SCRIPT_DIR}/third_party/build --edges64bit #--debug
+./configure --prefix=${SCRIPT_DIR}/third_party/build --edges64bit --weights64bit #--debug
 make -j
 make install
 popd

@@ -2,6 +2,7 @@
 #include <pybind11/numpy.h>
 #include <vector>
 #include <cstdint>
+#include <iostream>
 #include "mt_metis_assignment.h"
 #include "make_sym.h"
 
@@ -41,7 +42,7 @@ namespace pymetis
             indptr_span = sym_indptr;
             indices_span = sym_indices;
             edge_weight_span = sym_data;
-
+            std::cout << "start metis partitioning" << std::endl;
             std::vector<uint32_t> result = mt_metis_assignment(num_partition, num_iteration, num_initpart, unbalance_val, obj_cut,
                                                                indptr_span, indices_span, node_weight_span, edge_weight_span);
             return py::array_t<uint32_t>(result.size(), result.data());
@@ -51,7 +52,7 @@ namespace pymetis
             auto [sym_indptr, sym_indices] = make_sym(indptr_span, indices_span);
             indptr_span = sym_indptr;
             indices_span = sym_indices;
-
+            std::cout << "start metis partitioning" << std::endl;
             std::vector<uint32_t> result = mt_metis_assignment(num_partition, num_iteration, num_initpart, unbalance_val, obj_cut,
                                                                indptr_span, indices_span, node_weight_span, edge_weight_span);
 
